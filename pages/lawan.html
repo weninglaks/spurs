@@ -1,0 +1,82 @@
+<div class="container center-align">
+  <div class="forOppositionTeams container dotted">
+    <div class="row dotted">
+      <div class="col teamCrest dotted" id="teamCrest">hello</div>
+      <div class="col dotted">
+        <div class="input-field col s12 " id="teamNameColumn">
+         <select class="browser-default" id="selectTeam">
+           <option value="" disabled selected>Pilih klub:</option>
+           <option value="1">Tottenham Hotspur FC</option>
+           <option value="2">Option 2</option>
+           <option value="3">Option 3</option>
+         </select>
+       </div>
+
+        <div class="row">
+          <div class="col position" >
+            <div>Peringkat</div>
+            <div id="position"></div>
+          </div>
+          <div class="col goalDifference" >
+            <div>Selisih Gol</div>
+            <div id="goalDifference"></div>
+          </div>
+          <div class="col points">
+            <div>Poin</div>
+            <div id="points"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div>Performa 5 laga teakhir</div>
+      <div class="overallForm"></div>
+      <div class="homeForm"></div>
+      <div class="awayForm"></div>
+    </div>
+  </div>
+
+
+  <div class="forSpurs container dotted">
+    <div class="row dotted">
+      <div class="col teamCrest dotted" id="teamCrest-spurs">hello</div>
+      <div class="col dotted">
+        <div class=" col s12 " id="teamNameColumn-spurs">
+         <div id="selectTeam-spurs">
+
+         </div>
+       </div>
+
+        <div class="row">
+          <div class="col position" >
+            <div>Peringkat</div>
+            <div id="position-spurs"></div>
+          </div>
+          <div class="col goalDifference" >
+            <div>Selisih Gol</div>
+            <div id="goalDifference-spurs"></div>
+          </div>
+          <div class="col points">
+            <div>Poin</div>
+            <div id="points-spurs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div>Performa 5 laga teakhir</div>
+      <div class="overallForm-spurs"></div>
+      <div class="homeForm-spurs"></div>
+      <div class="awayForm-spurs"></div>
+    </div>
+  </div>
+
+
+  <button type="button" name="printbutton" onClick="consoleLog()">print</button>
+  <button type="button" name="teaminfobutton" onClick="putTeamInfo()">getTeamInfo()</button>
+
+
+
+
+
+</div>
