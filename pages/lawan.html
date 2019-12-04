@@ -1,14 +1,12 @@
 <div class="container center-align">
-  <div class="forOppositionTeams container dotted">
+
+  <div class="teamInfoWrap container dotted" id="forOppositionTeams">
     <div class="row dotted">
-      <div class="col teamCrest dotted" id="teamCrest">hello</div>
-      <div class="col dotted">
+      <div class="col s3 m2 l2 teamCrest dotted" id="teamCrest"></div>
+      <div class="col s9 m5 l5 dotted height-150">
         <div class="input-field col s12 " id="teamNameColumn">
-         <select class="browser-default" id="selectTeam">
-           <option value="" disabled selected>Pilih klub:</option>
-           <option value="1">Tottenham Hotspur FC</option>
-           <option value="2">Option 2</option>
-           <option value="3">Option 3</option>
+         <select class="browser-default" id="selectTeam" onchange="loadSingleTeamInfo()">
+
          </select>
        </div>
 
@@ -27,24 +25,22 @@
           </div>
         </div>
       </div>
+
+      <div class="col s12 m5 l5 dotted height-150">
+        <div>Performa 5 laga terakhir</div>
+        <div id="overallForm" class="row"></div>
+      </div>
     </div>
-    <div>
-      <div>Performa 5 laga teakhir</div>
-      <div class="overallForm"></div>
-      <div class="homeForm"></div>
-      <div class="awayForm"></div>
-    </div>
+
   </div>
 
 
-  <div class="forSpurs container dotted">
+  <div class="teamInfoWrap forSpurs container dotted">
     <div class="row dotted">
-      <div class="col teamCrest dotted" id="teamCrest-spurs">hello</div>
-      <div class="col dotted">
-        <div class=" col s12 " id="teamNameColumn-spurs">
-         <div id="selectTeam-spurs">
-
-         </div>
+      <div class="col s3 m2 l2 teamCrest dotted" id="teamCrest-spurs"></div>
+      <div class="col s9 m5 l5 dotted height-150">
+        <div id="teamNameColumn-spurs">
+          <div id="selectTeam-spurs"></div>
        </div>
 
         <div class="row">
@@ -62,20 +58,14 @@
           </div>
         </div>
       </div>
+
+      <div class="col s12 m5 l5 dotted height-150">
+        <div>Performa 5 laga terakhir</div>
+        <div id="overallForm-spurs" class="row"></div>
+      </div>
     </div>
-    <div>
-      <div>Performa 5 laga teakhir</div>
-      <div class="overallForm-spurs"></div>
-      <div class="homeForm-spurs"></div>
-      <div class="awayForm-spurs"></div>
-    </div>
+
   </div>
-
-
-  <button type="button" name="printbutton" onClick="consoleLog()">print</button>
-  <button type="button" name="teaminfobutton" onClick="putTeamInfo()">getTeamInfo()</button>
-
-
 
 
 

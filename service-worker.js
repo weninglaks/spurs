@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spurs-v0.0.40';
+const CACHE_NAME = 'spurs-v0.0.1.126';
 var urlsToCache = [
 	'/',
 	'/nav.html',

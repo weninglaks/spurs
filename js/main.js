@@ -11,14 +11,31 @@ if ("serviceWorker" in navigator) {
     console.log("ServiceWorker belum didukung browser ini.");
 }
 
+
+//NOTIFICATION API
+if ("Notification" in window) {
+      requestPermission();
+    } else {
+      console.error("Browser tidak mendukung notifikasi.");
+    }
+
+    // Meminta ijin menggunakan Notification API
+    function requestPermission() {
+      Notification.requestPermission().then(function (result) {
+        if (result === "denied") {
+          console.log("Fitur notifikasi tidak diijinkan.");
+          return;
+        } else if (result === "default") {
+          console.error("Pengguna menutup kotak dialog permintaan ijin.");
+          return;
+        }
+
+        console.log("Fitur notifikasi diijinkan.");
+      });
+    }
+
+
 document.addEventListener("DOMContentLoaded", function() {
-
-
-  // getLeagueStanding();
-  // getTeamInfo().then(console.log("selesai menyimpan"))
-  // consoleLog()
-  putTeamInfo()
-
 
   let elems = document.querySelectorAll('.sidenav');
 	M.Sidenav.init(elems);
@@ -62,16 +79,15 @@ document.addEventListener("DOMContentLoaded", function() {
 	loadPage(page);
 
 
-  function loadPage (page) {
-    fetch('pages/'+page+'.html')
+  async function loadPage (page) {
+    await fetch('pages/'+page+'.html')
       .then( res => res.text())
       .then( text => {
         document.querySelector(".body-content").innerHTML = text
       })
-      .then(
-        loadContent(page)
-      )
       .catch( rsp => console.log("error: " + rsp.status));
+
+    await loadContent(page)
   }
 
   function loadContent (page) {
@@ -83,28 +99,12 @@ document.addEventListener("DOMContentLoaded", function() {
         getLeagueStanding();
         break;
       case "lawan":
-        console.log("lawan")
         handleLawanPage();
         break;
-      default: getUpcomingMatches()
+      default: () => {document.getElementById("upcomingMatches").innerHTML = matches}
     }
   }
 
-
-  // Close the dropdown menu if the user clicks outside of it
-  //
-  // window.onclick = function(event) {
-  // if (!event.target.matches('.dropbtn')) {
-  //   var dropdowns = document.getElementsByClassName("dropdown-content");
-  //   var i;
-  //   for (i = 0; i < dropdowns.length; i++) {
-  //     var openDropdown = dropdowns[i];
-  //     if (openDropdown.classList.contains('show')) {
-  //       openDropdown.classList.remove('show');
-  //     }
-  //   }
-  // }
-  // }
 
 
 
@@ -124,11 +124,4 @@ const consoleLog = () => {
       console.log(data)
     }
   );
-}
-
-/* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
-function myFunction() {
-document.getElementById("myDropdown").classList.toggle("show");
-console.log("pressed")
 }

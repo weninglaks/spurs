@@ -98,108 +98,90 @@ const getLeagueStanding = () => {
   )
 }
 
+let dbPromise = idb.open("spurs_info_db", 4, function(upgradeDb) {
+  if (!upgradeDb.objectStoreNames.contains("teamInfo")) {
+    var bikinTable = upgradeDb.createObjectStore("teamInfo", { keyPath: "id" });
+    bikinTable.createIndex("name", "name", { unique: false });
+  }
+});
+
 
 const putTeamInfo = async () => {
-  let firstResponse = await fetch (base_url + "competitions/2021/standings/",
-                      {
-                        method : "GET",
-                        headers: {
-                                  "X-Auth-Token": "f5fab0e8ba8b41b8a65ccec3b7778e07"
-                                 }
-                      });
-  let firstResult  = await firstResponse.json();
-  let teamList     = firstResult.standings[0].table
 
-  for (let i=0; i < teamList.length; i++) {
-    // let res = await fetch ( base_url +`teams/${teamList[i].team.id}/matches?status=FINISHED`,
-    //                       {
-    //                         method  : "GET",
-    //                         headers : {
-    //                                   "X-Auth-Token": "f5fab0e8ba8b41b8a65ccec3b7778e07"
-    //                                  }
-    //                       });
-    //
-    // let lastFive = await res.json();
+  let options = { method : "GET",
+                  headers: {"X-Auth-Token": "f5fab0e8ba8b41b8a65ccec3b7778e07"}
+                }
+
+  let firstResponse = await fetch (base_url + "competitions/2021/standings/", options );
+  let firstResult   = await firstResponse.json();
+  let teamList      = firstResult.standings[0].table;
+
+  for (const obj of teamList) {
+
+    let item = {
+        id: obj.team.id,
+        name: obj.team.name,
+        crestURL: obj.team.crestUrl,
+        position: obj.position,
+        goalDifference: obj.goalDifference,
+        points: obj.points,
+    };
 
     dbPromise.then( (db) => {
         let tx = db.transaction('teamInfo', 'readwrite');
         let store = tx.objectStore('teamInfo');
-        let item = {
-            id: teamList[i].team.id,
-            name: teamList[i].team.name,
-            crestURL: teamList[i].team.crestUrl,
-            position: teamList[i].position,
-            goalDifference: teamList[i].goalDifference,
-            points: teamList[i].points,
-            // form : lastFive
-        };
+
         store.put(item);
         return tx.complete;
     }).then( () => {
         console.log('item berhasil disimpan.')
     }).catch( () => {
         console.log('item gagal disimpan.')
-    })
- }
+    });
 
+ }
+ console.log('putTeamInfo called.')
 }
 
+// const putTeamInfoChecker = async () => {
+//
+//   dbPromise.then( (db) => {
+//     let tx = db.transaction('teamInfo', 'readonly');
+//     let store = tx.objectStore('teamInfo');
+//     let count = store.count()
+//
+//     return count.result
+//     count.onsuccess = function() {
+//       console.log(count.result);
+//     }
+//   })
+//
+// }
 
 const handleLawanPage = async () => {
-  await dbPromise.then(function(db) {
-    db.transaction("teamInfo").objectStore("teamInfo").openCursor("73").onsuccess = function(e) {
-      var cursor = e.target.result;
-      if (cursor) { // key already exist
-       console.log(success)
-      } else { // key not exist
-       console.log(error)
-      }
-    };
-  });
+  await putTeamInfo()
 
-  // mengolah data team Hotspur
-
-  await dbPromise.then(function(db) {
+  // mengolah data team Hotspur, id=73
+  dbPromise.then(function(db) {
     var tx = db.transaction('teamInfo', 'readonly');
     var store = tx.objectStore('teamInfo');
     return store.get(73);
-  }).then(function(spurs) {
-      console.log(spurs)
-      fetchData(
-        `${base_url}teams/73/matches?status=FINISHED`,
-        data => {
+  }).then((spurs) => {
 
-          dbPromise.then( (db) => {
-              let tx = db.transaction('teamInfo', 'readwrite');
-              let store = tx.objectStore('teamInfo');
-              let item = {
-                  id: spurs.id,
-                  name: spurs.name,
-                  crestURL: spurs.crestURL,
-                  position: spurs.position,
-                  goalDifference: spurs.goalDifference,
-                  points: spurs.points,
-                  form : data
-              };
-              store.put(item);
-              return tx.complete;
-          }).catch( () => {
-              console.log('item spurs gagal disimpan.')
-          });
+    // memuat ke halaman html
+    document.getElementById('teamCrest-spurs').innerHTML = `<img class="responsive-img" src=${spurs.crestURL} alt="team crest" >`
+    document.getElementById('selectTeam-spurs').innerText = spurs.name
+    document.getElementById('position-spurs').innerText = spurs.position
+    document.getElementById('goalDifference-spurs').innerText = spurs.goalDifference
+    document.getElementById('points-spurs').innerText = spurs.points
 
-          document.getElementById('teamCrest-spurs').innerHTML = `<img src=${spurs.crestURL} alt="team crest">`
-          document.getElementById('selectTeam-spurs').innerText = spurs.name
-          document.getElementById('position-spurs').innerText = spurs.position
-          document.getElementById('goalDifference-spurs').innerText = spurs.goalDifference
-          document.getElementById('points-spurs').innerText = spurs.points
+    // menyimpan data baru ke idb
+    getTeamForm(spurs, "overallForm-spurs")
 
-        }
-      );
+  }).catch(error);
 
-  });
-
-
-  await dbPromise.then(function(db) {
+  // info team placeholder
+  dbPromise.then(function(db) {
     var tx = db.transaction('teamInfo', 'readonly');
     var store = tx.objectStore('teamInfo');
     return store.getAll();
@@ -208,15 +190,117 @@ const handleLawanPage = async () => {
 
     items.forEach( (obj) => {
       selectTeam += `
-        <option value=${obj.id} >${obj.name}</option>
+        <option value=${obj.id}>${obj.name}</option>
       `
     });
+
     document.getElementById("selectTeam").innerHTML = selectTeam
-    document.getElementById('teamCrest').innerHTML = `<img src=${items[0].crestURL} alt="team crest">`
+    document.getElementById('teamCrest').innerHTML = `<img class="responsive-img" src=${items[0].crestURL} alt="team crest" >`
     document.getElementById('position').innerText = items[0].position
     document.getElementById('goalDifference').innerText = items[0].goalDifference
     document.getElementById('points').innerText = items[0].points
 
-  });
+    getTeamForm(items[0], "overallForm")
+  }).catch(error);
 
+}
+
+
+const getTeamForm = async (object, targetDivId) => {
+  let item = {
+      id: object.id,
+      name: object.name,
+      crestURL: object.crestURL,
+      position: object.position,
+      goalDifference: object.goalDifference,
+      points: object.points,
+      form: object.form
+  };
+
+
+  if (typeof item.form === 'undefined') {
+    await fetchData(
+      `${base_url}teams/${object.id}/matches?status=FINISHED`,
+      data => {
+        let lastFiveMatches = data.matches.slice(-5)
+        let form = [];
+
+        for (const obj of lastFiveMatches) {
+          let formItem = {
+            matchId: obj.id,
+            venue: obj.awayTeam.id === object.id ? "AWAY" : "HOME",
+            versus: obj.awayTeam.id === object.id ? obj.homeTeam : obj.awayTeam,
+            utcDate: obj.utcDate,
+            competition: obj.competition,
+            score: obj.score.fullTime
+          }
+
+          switch (obj.score.winner) {
+            case "AWAY_TEAM":
+              obj.awayTeam.id === object.id ? formItem.point = 3 : formItem.point = 0
+              break;
+            case "HOME_TEAM":
+              obj.awayTeam.id === object.id ? formItem.point = 0 : formItem.point = 3
+              break;
+            case "DRAW":
+              formItem.point = 1
+              break;
+            default: formItem.result = "unavailable"
+          }
+
+          form.push(formItem)
+
+        }
+
+        item.form = form
+
+        let formHTML = ''
+        item.form.forEach( obj =>{
+          formHTML += `
+            <div class="col l2">${obj.point}</div>
+          `
+        })
+        document.getElementById(targetDivId).innerHTML = formHTML
+      })
+
+    await dbPromise.then( (db) => {
+        let tx = db.transaction('teamInfo', 'readwrite');
+        let store = tx.objectStore('teamInfo');
+        store.put(item);
+        return tx.complete;
+    })
+    .catch( () => {
+        console.log('item spurs gagal disimpan.')
+    });
+
+  } else {
+
+    let formHTML = ''
+    item.form.forEach( obj =>{
+      formHTML += `
+        <div>${obj.point}</div>
+      `
+    })
+    document.getElementById(targetDivId).innerHTML = formHTML
+
+  }
+}
+
+const loadSingleTeamInfo = () => {
+  var x = document.getElementById("selectTeam").value;
+  console.log(x)
+
+  dbPromise.then(function(db) {
+    var tx = db.transaction('teamInfo', 'readonly');
+    var store = tx.objectStore('teamInfo');
+    return store.get( parseInt(x) );
+  }).then((data)=>{
+    console.log(data)
+    document.getElementById('teamCrest').innerHTML = `<img class="responsive-crest" src=${data.crestURL} alt="team crest" >`
+    document.getElementById('position').innerText = data.position
+    document.getElementById('goalDifference').innerText = data.goalDifference
+    document.getElementById('points').innerText = data.points
+
+    getTeamForm(data, "overallForm")
+  })
 }
