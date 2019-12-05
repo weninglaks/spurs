@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spurs-v0.0.1.126';
+const CACHE_NAME = 'spurs-v0.0.4';
 var urlsToCache = [
 	'/',
 	'/nav.html',
@@ -14,7 +14,11 @@ var urlsToCache = [
 	'/css/style.css',
 	'/js/materialize.min.js',
 	'/js/main.js',
+	'/js/api.js',
+	'/js/idb.js'
 ];
+
+
 
 self.addEventListener('install', function(event){
 	event.waitUntil(
@@ -63,5 +67,26 @@ self.addEventListener('fetch', function(event) {
         }
       );
     })
+  );
+});
+
+self.addEventListener('push', function(event) {
+  var body;
+  if (event.data) {
+    body = event.data.text();
+  } else {
+    body = 'no payload';
+  }
+  var options = {
+    body: body,
+    icon: 'spurs_icon_192x192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    }
+  };
+  event.waitUntil(
+    self.registration.showNotification('Push Notification', options)
   );
 });

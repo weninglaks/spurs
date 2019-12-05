@@ -98,7 +98,7 @@ const getLeagueStanding = () => {
   )
 }
 
-let dbPromise = idb.open("spurs_info_db", 4, function(upgradeDb) {
+let dbPromise = idb.open("spurs_info_db", 1, function(upgradeDb) {
   if (!upgradeDb.objectStoreNames.contains("teamInfo")) {
     var bikinTable = upgradeDb.createObjectStore("teamInfo", { keyPath: "id" });
     bikinTable.createIndex("name", "name", { unique: false });
@@ -125,6 +125,7 @@ const putTeamInfo = async () => {
         position: obj.position,
         goalDifference: obj.goalDifference,
         points: obj.points,
+        result: obj.result
     };
 
     dbPromise.then( (db) => {
@@ -237,13 +238,16 @@ const getTeamForm = async (object, targetDivId) => {
 
           switch (obj.score.winner) {
             case "AWAY_TEAM":
-              obj.awayTeam.id === object.id ? formItem.point = 3 : formItem.point = 0
+              formItem.point = obj.awayTeam.id === object.id ? 3 : 0;
+              formItem.result = obj.awayTeam.id === object.id ? "M" : "K";
               break;
             case "HOME_TEAM":
-              obj.awayTeam.id === object.id ? formItem.point = 0 : formItem.point = 3
+              formItem.point = obj.awayTeam.id === object.id ? 0 : 3;
+              formItem.result = obj.awayTeam.id === object.id ? "K" : "M";
               break;
             case "DRAW":
-              formItem.point = 1
+              formItem.point = 1;
+              formItem.result = "S";
               break;
             default: formItem.result = "unavailable"
           }
@@ -254,10 +258,20 @@ const getTeamForm = async (object, targetDivId) => {
 
         item.form = form
 
+        function classNamer (point)  {
+          if (point===3) {
+            return "menang"
+          } else if (point ===1) {
+            return "seri"
+          } else {
+            return "kalah"
+          }
+        }
+
         let formHTML = ''
         item.form.forEach( obj =>{
           formHTML += `
-            <div class="col l2">${obj.point}</div>
+            <div class="col l2 matchResult ${classNamer(obj.point)}">${obj.result}</div>
           `
         })
         document.getElementById(targetDivId).innerHTML = formHTML
@@ -278,7 +292,7 @@ const getTeamForm = async (object, targetDivId) => {
     let formHTML = ''
     item.form.forEach( obj =>{
       formHTML += `
-        <div>${obj.point}</div>
+        <div class="col l2 matchResult ${classNamer(obj.point)}">${obj.result}</div>
       `
     })
     document.getElementById(targetDivId).innerHTML = formHTML

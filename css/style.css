@@ -33,3 +33,23 @@
 .teamInfoWrap {
   margin: 20px auto;
 }
+
+.matchResult {
+  border-radius: 50%;
+  background: yellow;
+  margin: 2px;
+}
+
+.menang {
+  background: green;
+  color: white;
+}
+
+.kalah {
+  background: red;
+  color: white;
+}
+
+.seri {
+  background: #c2c2c2;
+}
