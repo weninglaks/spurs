@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spurs-v0.0.4';
+const CACHE_NAME = 'spurs-v0.0.7.23';
 var urlsToCache = [
 	'/',
 	'/nav.html',
@@ -7,6 +7,7 @@ var urlsToCache = [
 	'/favicon.png',
 	'/spurs_icon_512x512.png',
 	'/spurs_icon_192x192.png',
+	'/custom_icon.png',
 	'/pages/laga.html',
 	'/pages/klasemen.html',
 	'/pages/lawan.html',
@@ -15,7 +16,8 @@ var urlsToCache = [
 	'/js/materialize.min.js',
 	'/js/main.js',
 	'/js/api.js',
-	'/js/idb.js'
+	'/js/idb.js',
+	'https://fonts.googleapis.com/icon?family=Material+Icons'
 ];
 
 

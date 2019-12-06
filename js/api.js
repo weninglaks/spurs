@@ -1,5 +1,5 @@
 const base_url = "https://api.football-data.org/v2/";
-
+const token    = "f5fab0e8ba8b41b8a65ccec3b7778e07"
 
 function status(response) {
   if (response.status !== 200) {
@@ -19,13 +19,17 @@ function error(error) {
   console.log(error);
 }
 
-function fetchData (url, callback) {
-  fetch(url, {
-    method: "GET",
+
+const fetchApi = function(url) {
+  return fetch(url, {
     headers: {
-        "X-Auth-Token": "f5fab0e8ba8b41b8a65ccec3b7778e07"
+      'X-Auth-Token': token
     }
-  })
+  });
+};
+
+function fetchData (url, callback) {
+  fetchApi(url)
     .then(status)
     .then(json)
     .then(function(data) {
@@ -98,21 +102,23 @@ const getLeagueStanding = () => {
   )
 }
 
-let dbPromise = idb.open("spurs_info_db", 1, function(upgradeDb) {
+let dbPromise = idb.open("spurs_info_db", 2, function(upgradeDb) {
   if (!upgradeDb.objectStoreNames.contains("teamInfo")) {
     var bikinTable = upgradeDb.createObjectStore("teamInfo", { keyPath: "id" });
     bikinTable.createIndex("name", "name", { unique: false });
   }
+  if(!upgradeDb.objectStoreNames.contains("favorit")) {
+		var objectStore = upgradeDb.createObjectStore("favorit", { keyPath: "id" });
+		objectStore.createIndex("shortName", "shortName", { unique: false });
+	}
 });
+
+
 
 
 const putTeamInfo = async () => {
 
-  let options = { method : "GET",
-                  headers: {"X-Auth-Token": "f5fab0e8ba8b41b8a65ccec3b7778e07"}
-                }
-
-  let firstResponse = await fetch (base_url + "competitions/2021/standings/", options );
+  let firstResponse = await fetchApi (base_url + "competitions/2021/standings/");
   let firstResult   = await firstResponse.json();
   let teamList      = firstResult.standings[0].table;
 
@@ -134,33 +140,29 @@ const putTeamInfo = async () => {
 
         store.put(item);
         return tx.complete;
-    }).then( () => {
-        console.log('item berhasil disimpan.')
     }).catch( () => {
         console.log('item gagal disimpan.')
     });
 
  }
- console.log('putTeamInfo called.')
+
 }
 
-// const putTeamInfoChecker = async () => {
-//
-//   dbPromise.then( (db) => {
-//     let tx = db.transaction('teamInfo', 'readonly');
-//     let store = tx.objectStore('teamInfo');
-//     let count = store.count()
-//
-//     return count.result
-//     count.onsuccess = function() {
-//       console.log(count.result);
-//     }
-//   })
-//
-// }
+// VERY VERY PATCHY SMH
+const putTeamInfoCheck = async () => {
+
+  dbPromise.then(function(db) {
+    var tx = db.transaction('teamInfo', 'readonly');
+    var store = tx.objectStore('teamInfo');
+    return store.get(73);
+  }).catch(
+    () => {putTeamInfo()}
+  )
+
+}
 
 const handleLawanPage = async () => {
-  await putTeamInfo()
+  await putTeamInfoCheck()
 
   // mengolah data team Hotspur, id=73
   dbPromise.then(function(db) {
@@ -170,11 +172,52 @@ const handleLawanPage = async () => {
   }).then((spurs) => {
 
     // memuat ke halaman html
-    document.getElementById('teamCrest-spurs').innerHTML = `<img class="responsive-img" src=${spurs.crestURL} alt="team crest" >`
-    document.getElementById('selectTeam-spurs').innerText = spurs.name
-    document.getElementById('position-spurs').innerText = spurs.position
-    document.getElementById('goalDifference-spurs').innerText = spurs.goalDifference
-    document.getElementById('points-spurs').innerText = spurs.points
+    // document.getElementById('teamCrest-spurs').innerHTML = `<img class="responsive-img" src=${spurs.crestURL} alt="team crest" >`
+    // document.getElementById('selectTeam-spurs').innerText = spurs.name
+    // document.getElementById('position-spurs').innerText = spurs.position
+    // document.getElementById('goalDifference-spurs').innerText = spurs.goalDifference
+    // document.getElementById('points-spurs').innerText = spurs.points
+
+    let textHTML = `
+    <div class="row dotted">
+      <div class="col s3 m2 l2 teamCrest dotted" id="teamCrest-spurs">
+        <img class="responsive-img" src=${spurs.crestURL} alt="team crest" >
+      </div>
+      <div class="col s9 m5 l5 dotted height-150">
+        <div id="teamNameColumn-spurs">
+          <div id="selectTeam-spurs">
+            ${spurs.name}
+          </div>
+       </div>
+
+        <div class="row">
+          <div class="col position" >
+            <div>Peringkat</div>
+            <div id="position-spurs">${spurs.position}</div>
+          </div>
+          <div class="col goalDifference" >
+            <div>Selisih Gol</div>
+            <div id="goalDifference-spurs">${spurs.goalDifference}</div>
+          </div>
+          <div class="col points">
+            <div>Poin</div>
+            <div id="points-spurs">${spurs.points}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col s12 m5 l5 dotted height-150" id="kolomForm-spurs">
+        <div>Performa 5 laga terakhir</div>
+        <div id="overallForm-spurs" class="row"></div>
+        <a class="waves-effect waves-light btn-small red darken-2" onClick="addFavorite(${spurs.id})">
+          Favoritkan
+        </a>
+      </div>
+    </div>
+    `;
+
+
+    document.getElementById('forSpurs').innerHTML = textHTML
 
     // menyimpan data baru ke idb
     getTeamForm(spurs, "overallForm-spurs")
@@ -186,7 +229,7 @@ const handleLawanPage = async () => {
     var tx = db.transaction('teamInfo', 'readonly');
     var store = tx.objectStore('teamInfo');
     return store.getAll();
-  }).then(function(items) {
+  }).then( (items) => {
     let selectTeam = ""
 
     items.forEach( (obj) => {
@@ -195,13 +238,54 @@ const handleLawanPage = async () => {
       `
     });
 
-    document.getElementById("selectTeam").innerHTML = selectTeam
-    document.getElementById('teamCrest').innerHTML = `<img class="responsive-img" src=${items[0].crestURL} alt="team crest" >`
-    document.getElementById('position').innerText = items[0].position
-    document.getElementById('goalDifference').innerText = items[0].goalDifference
-    document.getElementById('points').innerText = items[0].points
+    // document.getElementById("selectTeam").innerHTML = selectTeam
+    // document.getElementById('teamCrest').innerHTML = `<img class="responsive-img" src=${items[0].crestURL} alt="team crest" >`
+    // document.getElementById('position').innerText = items[0].position
+    // document.getElementById('goalDifference').innerText = items[0].goalDifference
+    // document.getElementById('points').innerText = items[0].points
+
+    let textHTML = `
+      <div class="row dotted">
+        <div class="col s3 m2 l2 teamCrest dotted" id="teamCrest">
+          <img class="responsive-img" src=${items[0].crestURL} alt="team crest" >
+        </div>
+        <div class="col s9 m5 l5 dotted height-150">
+          <div class="input-field col s12 " id="teamNameColumn">
+           <select class="browser-default" id="selectTeam" onchange="loadSingleTeamInfo()">
+            ${selectTeam}
+           </select>
+         </div>
+
+          <div class="row">
+            <div class="col position" >
+              <div>Peringkat</div>
+              <div id="position">${items[0].position}</div>
+            </div>
+            <div class="col goalDifference" >
+              <div>Selisih Gol</div>
+              <div id="goalDifference">${items[0].goalDifference}</div>
+            </div>
+            <div class="col points">
+              <div>Poin</div>
+              <div id="points">${items[0].points}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m5 l5 dotted height-150" id="kolomForm">
+          <div>Performa 5 laga terakhir</div>
+          <div id="overallForm" class="row"></div>
+          <a class="waves-effect waves-light btn-small red darken-2" onClick="addFavorite(${items[0].id})">
+            Favoritkan
+          </a>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('forOppositionTeams').innerHTML = textHTML
 
     getTeamForm(items[0], "overallForm")
+
   }).catch(error);
 
 }
@@ -219,7 +303,7 @@ const getTeamForm = async (object, targetDivId) => {
   };
 
 
-  if (typeof item.form === 'undefined') {
+  if ( typeof item.form === 'undefined' ) {
     await fetchData(
       `${base_url}teams/${object.id}/matches?status=FINISHED`,
       data => {
@@ -269,12 +353,14 @@ const getTeamForm = async (object, targetDivId) => {
         }
 
         let formHTML = ''
-        item.form.forEach( obj =>{
+        item.form.forEach( obj => {
           formHTML += `
             <div class="col l2 matchResult ${classNamer(obj.point)}">${obj.result}</div>
           `
         })
+
         document.getElementById(targetDivId).innerHTML = formHTML
+
       })
 
     await dbPromise.then( (db) => {
@@ -296,25 +382,128 @@ const getTeamForm = async (object, targetDivId) => {
       `
     })
     document.getElementById(targetDivId).innerHTML = formHTML
-
   }
 }
 
 const loadSingleTeamInfo = () => {
   var x = document.getElementById("selectTeam").value;
-  console.log(x)
 
   dbPromise.then(function(db) {
     var tx = db.transaction('teamInfo', 'readonly');
     var store = tx.objectStore('teamInfo');
     return store.get( parseInt(x) );
-  }).then((data)=>{
-    console.log(data)
+  }).then( (data)=>{
+
     document.getElementById('teamCrest').innerHTML = `<img class="responsive-crest" src=${data.crestURL} alt="team crest" >`
     document.getElementById('position').innerText = data.position
     document.getElementById('goalDifference').innerText = data.goalDifference
     document.getElementById('points').innerText = data.points
 
+    let textHTML = `
+    <div>Performa 5 laga terakhir</div>
+    <div id="overallForm" class="row"></div>
+    <a class="waves-effect waves-light btn-small red darken-2" onClick="addFavorite(${data.id})">
+      Favoritkan
+    </a>
+    `
+    document.getElementById('kolomForm').innerHTML = textHTML
+
     getTeamForm(data, "overallForm")
   })
+}
+
+
+const consoleLog = () => {
+  fetchData(`${base_url}teams/73`,
+    (data) => {console.log(data)}
+  )
+  putTeamInfoCheck();
+}
+
+const addFavorite = async (id) => {
+  console.log(id)
+  let rsp      = await fetchApi (base_url + `teams/${id}/`);
+  let result   = await rsp.json();
+
+  console.log(result)
+
+  dbPromise.then(function(db) {
+    var tx = db.transaction('favorit', 'readwrite');
+    var store = tx.objectStore('favorit');
+    return store.put( result );
+  })
+
+}
+
+const loadFavorit = () => {
+  dbPromise.then( db => {
+    var tx = db.transaction('favorit', 'readonly');
+    var store = tx.objectStore('favorit');
+    return store.getAll();
+  }).then( data => {
+
+    let cards = ''
+
+    for (obj of data) {
+
+      let activeCompetitions = ``
+
+      obj.activeCompetitions.forEach((x)=>{
+        activeCompetitions += `<li>${x.name}, ${x.area.name}</li>`
+      })
+
+      cards += `
+      <div class="col sm12 m6 l4">
+        <div class="card hoverable">
+          <div class="card-image waves-effect waves-block waves-light">
+            <img class="activator" src=${obj.crestUrl}>
+          </div>
+          <div class="card-content">
+            <span class="card-title activator grey-text text-darken-4">${obj.shortName}<i class="material-icons right">more_vert</i></span>
+            <p><a href=${obj.website}>ke website!</a></p>
+          </div>
+          <div class="card-reveal">
+            <span class="card-title grey-text text-darken-4">${obj.name}<i class="material-icons right">close</i></span>
+
+            <p>
+              Venue: ${obj.venue} <br/>
+              Tahun berdiri: ${obj.founded}
+            </p>
+            <span>Kompetisi aktif:</span>
+            <ul>
+              ${activeCompetitions}
+            </ul>
+            <p>
+              Contact: <br/>
+              ${obj.phone} <br/>
+              ${obj.email}
+            </p>
+            <a class="waves-effect waves-light btn-small red darken-2" onClick="removeFavorite(${obj.id})">
+              Hapus
+            </a>
+          </div>
+
+        </div>
+      </div>
+      `
+    }
+
+    document.getElementById('favoriteCards').innerHTML = cards
+
+  }).catch(error)
+}
+
+const removeFavorite = async (id) => {
+
+  await dbPromise.then(function(db) {
+    var tx = db.transaction('favorit', 'readwrite');
+    var store = tx.objectStore('favorit');
+    store.delete(id);
+    return tx.complete;
+  }).then(function() {
+    console.log('Item deleted');
+  });
+
+  loadFavorit()
+
 }
