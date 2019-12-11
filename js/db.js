@@ -76,8 +76,6 @@ const addFavorite = async (id) => {
     return store.put( result );
   }).then(
     M.toast({html: 'ditambahkan ke daftar favorit!'})
-  ).catch(
-    M.toast({html: 'gagal menambahkan daftar favorit!'})
   )
 
 }
