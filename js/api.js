@@ -146,7 +146,7 @@ const handleLawanPage = async () => {
     let item = {
         id: obj.team.id,
         name: obj.team.name,
-        crestURL: obj.team.crestUrl,
+        crestURL: obj.team.crestUrl.replace(/^http:\/\//i, 'https://'),
         position: obj.position,
         goalDifference: obj.goalDifference,
         points: obj.points,
