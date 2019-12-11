@@ -1,76 +1,56 @@
-const CACHE_NAME = 'spurs-v0.0.7.23';
-var urlsToCache = [
-	'/',
-	'/nav.html',
-  '/manifest.json',
-	'/index.html',
-	'/favicon.png',
-	'/spurs_icon_512x512.png',
-	'/spurs_icon_192x192.png',
-	'/custom_icon.png',
-	'/pages/laga.html',
-	'/pages/klasemen.html',
-	'/pages/lawan.html',
-	'/css/materialize.min.css',
-	'/css/style.css',
-	'/js/materialize.min.js',
-	'/js/main.js',
-	'/js/api.js',
-	'/js/idb.js',
-	'https://fonts.googleapis.com/icon?family=Material+Icons'
-];
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js');
+
+// workbox.precaching.precacheAndRoute([
+//     { url: '/index.html', revision: '1' },
+//     { url: '/nav.html', revision: '1' },
+// 		{ url: '/manifest.json', revision: '1' },
+// 		{ url: '/favicon.png', revision: '1' },
+//     { url: '/css/materialize.min.css', revision: '1' },
+// 		{ url: '/css/style.css', revision: '1' },
+//     { url: '/js/materialize.min.js', revision: '1' },
+// 		{ url: '/js/idb.js', revision: '1' },
+// 		{ url: '/js/db.js', revision: '1' },
+//     { url: '/js/script.js', revision: '1' },
+// 		{ url: '/js/api.js', revision: '1' }
+// ]);
 
 
-
-self.addEventListener('install', function(event){
-	event.waitUntil(
-		caches.open(CACHE_NAME)
-		.then(function(cache) {
-			return cache.addAll(urlsToCache);
-		})
-	);
-})
-
-self.addEventListener('activate', function(event){
-	event.waitUntil(
-		caches.keys()
-		.then(function(cacheNames) {
-			return Promise.all(
-				cacheNames.map(function(cacheName){
-					if(cacheName != CACHE_NAME){
-
-						return caches.delete(cacheName);
-					}
-				})
-			);
-		})
-	);
-})
-
-self.addEventListener('fetch', function(event) {
-	event.respondWith(
-		caches.match(event.request, {cacheName:CACHE_NAME})
-		.then(function(response) {
-			if(response){
-				return response;
-			}
-			var fetchRequest = event.request.clone();
-      return fetch(fetchRequest).then(
-        function(response) {
-          if(!response || response.status !== 200) {
-            return response;
-          }
-          var responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-          .then(function(cache) {
-            cache.put(event.request, responseToCache);
-          });
-          return response;
-        }
-      );
+workbox.routing.registerRoute(
+  new RegExp('/pages/'),
+    workbox.strategies.staleWhileRevalidate({
+        cacheName: 'pages'
     })
-  );
-});
+);
+
+workbox.routing.registerRoute(
+  /\.(?:png|gif|jpg|jpeg|svg)$/,
+  workbox.strategies.cacheFirst({
+    cacheName: 'images',
+    plugins: [
+      new workbox.expiration.Plugin({
+        maxEntries: 60,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
+    ],
+  }),
+);
+
+workbox.routing.registerRoute(
+  /^https:\/\/fonts\.googleapis\.com/,
+  workbox.strategies.staleWhileRevalidate({
+    cacheName: 'google-fonts',
+  })
+);
+
+
+workbox.routing.registerRoute(
+  /^https:\/\/api\.football-data\.org/,
+  workbox.strategies.staleWhileRevalidate({
+    cacheName: 'football-data-',
+  })
+);
+
+
 
 self.addEventListener('push', function(event) {
   var body;
@@ -80,7 +60,8 @@ self.addEventListener('push', function(event) {
     body = 'no payload';
   }
   var options = {
-    body: body,
+    title: "spurs.info",
+    body: "hello world",
     icon: 'spurs_icon_192x192.png',
     vibrate: [100, 50, 100],
     data: {

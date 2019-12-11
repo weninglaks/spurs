@@ -1,6 +1,6 @@
 .dotted {
   box-sizing: border-box;
-  border: 1px dotted red;
+  border: 1px solid #d32f2f;
 }
 
 .navy-blue {
@@ -36,20 +36,24 @@
 
 .matchResult {
   border-radius: 50%;
-  background: yellow;
-  margin: 2px;
+  background: #ffeb3b ;
+  margin: 4px;
 }
 
 .menang {
-  background: green;
+  background: #2e7d32;
   color: white;
 }
 
 .kalah {
-  background: red;
+  background: #d32f2f ;
   color: white;
 }
 
 .seri {
   background: #c2c2c2;
+}
+
+.redText {
+  color: #d32f2f ;
 }

@@ -13,10 +13,10 @@ webPush.setVapidDetails(
 )
 
 var pushSubscription = {
-   "endpoint": "https://fcm.googleapis.com/fcm/send/eOTZVvHaBug:APA91bG_RUL0q-6pMeLcLZuZBX2G4PUQaC1w9bPrh-UwL7ds0o_ODlEg09HWNnOHnQSrsuccm0yL32Ck0UHJHk9NKqD6vWvp5bEhdV7hIhXfUloBsj93oi1lprudeH6y0B9aXTRR9fOC",
+   "endpoint": "https://fcm.googleapis.com/fcm/send/eYTSvU9Q48c:APA91bGVYPXfBX75UPGSlsY0NGJzCVb5uEwImuGLxPGLiIOvfZgwa-fW3ClWSw4_SkEHgI7B-aa2WP9U7F4oi4LKwgefXsqtme6eMyEukv27BI0tQgFuQmkUyU60k9WGO80AW9hvMibB",
    "keys": {
-       "p256dh": "BAHh8kymmQ3rgQ2grbtckqfYAtPAhAhJPOfvYvbVpB3CkxuFEceSzkNlWqNY8xBiPGWK2JZfuSRADJDB/5st9tQ=",
-       "auth": "R1W49aJSKMogHwivlz2Gbg=="
+       "p256dh": "BEZN5LwKMxC9JgI1+O3UMF8wkVhgCN8FjCYXMKQdomLziVcNdTi4PrS88teafh8yo7VF1JLyRQJagjrkKzuBscU=",
+       "auth": "oXWfWuSduupfi18RhsK8TA=="
    }
 };
 
@@ -26,7 +26,7 @@ var payload = "Tottenham 3 : 2 Bournemouth";
 
 
 var options = {
-   gcmAPIKey: '331959246420',
+   gcmAPIKey: '604445819314',
    TTL: 60
 };
 

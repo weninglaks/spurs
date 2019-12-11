@@ -1,8 +1,21 @@
 <div class="container center-align">
 
-  <div class="teamInfoWrap container dotted" id="forOppositionTeams">
+  <div class="teamInfoWrap container" id="forOppositionTeams">
     <div class="row dotted">
-      <div class="col s3 m2 l2 teamCrest dotted" id="teamCrest"></div>
+      <div class="col s3 m2 l2 teamCrest " id="teamCrest">
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-blue-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
       <div class="col s9 m5 l5 dotted height-150">
         <div class="input-field col s12 " id="teamNameColumn">
          <select class="browser-default" id="selectTeam" onchange="loadSingleTeamInfo()">
@@ -11,48 +24,61 @@
        </div>
 
         <div class="row">
-          <div class="col position" >
+          <div class="col s4 m4 l4 position" >
             <div>Peringkat</div>
             <div id="position"></div>
           </div>
-          <div class="col goalDifference" >
+          <div class="col s4 m4 l4 goalDifference" >
             <div>Selisih Gol</div>
             <div id="goalDifference"></div>
           </div>
-          <div class="col points">
+          <div class="col s4 m4 l4 points">
             <div>Poin</div>
             <div id="points"></div>
           </div>
         </div>
       </div>
 
-      <div class="col s12 m5 l5 dotted height-150" id="teamForm">
+      <div class="col s12 m5 l5 dotted height-150 container" id="kolomForm">
         <div>Performa 5 laga terakhir</div>
         <div id="overallForm" class="row"></div>
+
       </div>
     </div>
 
   </div>
 
 
-  <div class="teamInfoWrap forSpurs container dotted" id=forSpurs>
+  <div class="teamInfoWrap forSpurs container " id=forSpurs>
     <div class="row dotted">
-      <div class="col s3 m2 l2 teamCrest dotted" id="teamCrest-spurs"></div>
+      <div class="col s3 m2 l2 teamCrest " id="teamCrest-spurs">
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-blue-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="col s9 m5 l5 dotted height-150">
-        <div id="teamNameColumn-spurs">
-          <div id="selectTeam-spurs"></div>
+        <div id="teamNameColumn-spurs" class="left-align">
+          <b>Tottenham Hotspur FC</b>
        </div>
 
         <div class="row">
-          <div class="col position" >
+          <div class="col s4 m4 l4 position" >
             <div>Peringkat</div>
             <div id="position-spurs"></div>
           </div>
-          <div class="col goalDifference" >
+          <div class="col s4 m4 l4  goalDifference" >
             <div>Selisih Gol</div>
             <div id="goalDifference-spurs"></div>
           </div>
-          <div class="col points">
+          <div class="col s4 m4 l4 points">
             <div>Poin</div>
             <div id="points-spurs"></div>
           </div>
@@ -61,7 +87,14 @@
 
       <div class="col s12 m5 l5 dotted height-150">
         <div>Performa 5 laga terakhir</div>
-        <div id="overallForm-spurs" class="row"></div>
+        <div id="overallForm-spurs" class="row">
+          <div class="progress">
+            <div class="indeterminate"></div>
+          </div>
+        </div>
+        <a class="waves-effect waves-light btn-small red darken-2" onClick="addFavorite(73)">
+          Favoritkan
+        </a>
       </div>
     </div>
 
