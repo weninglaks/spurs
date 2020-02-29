@@ -1,2 +1,2 @@
 # spurs
-https://weninglaks.github.io/spurs
+https://xlaks.github.io/spurs
